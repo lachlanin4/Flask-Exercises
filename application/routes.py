@@ -5,49 +5,92 @@ from flask import Flask, render_template, request
 from application import app, db
 from application.models import Games
 from application.models import Task
-from application.models import BasicForm, myForm
-@app.route('/add/<word>')
-def add(word):
-    #new_game = Games(name="New Game")
-    new_task = Task(name=word,complete=False)
-    db.session.add(new_task)
-    db.session.commit()
-    return f"Added new task to database: {word}"
+from application.models import BasicForm, myForm, ShowToDoList
+@app.route('/add',methods=['GET','POST'])
+def add():
+    error=""
+    form=ShowToDoList()
+    
+    if request.method=='POST':
+        name=form.name.data
+        description=form.description.data
+        if len(name)<3 or len(description)<3:
+            error='Plese add an appropriate task'
+        else:
+            
+            new_task = Task(name=name,description=description,complete=False)
+            db.session.add(new_task)
+            db.session.commit() 
+            return 'Added the new task!'
+    return render_template('addtask.html',form=form,message=error)
 
-@app.route('/read')
+
+@app.route('/', methods=['GET','POST'])
+@app.route('/read',methods=['GET','POST'])
 def read():
-    #all_games = Games.query.all()
+    form=ShowToDoList()
+    forms=['']
     all_tasks= Task.query.all()
     tasks_string = ""
     for task in all_tasks:
-        tasks_string += "<br>"+ task.name + " " + str(task.complete)
+        tasks_string += "<br>"+ task.name + " " + task.description + " " + str(task.complete)
     return tasks_string
+    for task in all_tasks:
+        form.name=task.name
+        form.description=task.description
+        form.status=task.complete
+        forms.append(form)
 
-@app.route('/update/<nameIn>/<update>')
-def update(nameIn,update):
-    task = Task.query.filter_by(name=nameIn).first()
-    task.name = update
-    db.session.commit()
-    return task.name
+    return render_template('homeTask.html',tasks=forms,form=form)
 
-@app.route('/status/<taskName>/<status>')
-def status(taskName,status):
-    task = Task.query.filter_by(name=taskName).first()
-    if(status=='complete'):
-        task.complete=True
-        db.session.commit()
-    elif(status=='incomplete'):
-        task.complete=False
-        db.session.commit()
-    return redirect(url_for('read'))
+@app.route('/update',methods=['GET','POST'])
+def update():
+    error=""
+    form=ShowToDoList()
+    
+    if request.method=='POST':
+        
+        if len(form.name.data)<3 or Task.query.filter_by(name=form.name.data).first()==False:
+            error='Plese search for an existing task'
+        else:
+            task = Task.query.filter_by(name=form.name.data).first()
+            task.description=form.description.data
+            db.session.commit() 
+            return 'Updated the task!'
+    return render_template('addtask.html',form=form,message=error)
+
+@app.route('/status',methods=['GET','POST'])
+def status():
+    error=""
+    form=ShowToDoList()
+    
+    if request.method=='POST':
+        
+        if len(form.name.data)<3:
+            error='Plese search for an existing task'
+        else:
+            task = Task.query.filter_by(name=form.name.data).first()
+            task.complete=True
+            db.session.commit()
+            return 'Completed the task'
+    return render_template('deleteTask.html',form=form,message=error)
 
 
-@app.route('/delete/<taskName>')
-def delete(taskName):
-    task = Task.query.filter_by(name=taskName).first()
-    db.session.delete(task)
-    db.session.commit()
-    return 'Deleted the selected task'
+@app.route('/delete',methods=['GET','POST'])
+def delete():
+    error=""
+    form=ShowToDoList()
+    
+    if request.method=='POST':
+        
+        if len(form.name.data)<3:
+            error='Plese search for an existing task'
+        else:
+            task = Task.query.filter_by(name=form.name.data).first()
+            db.session.delete(task)
+            db.session.commit()
+            return 'Deleted the task!'
+    return render_template('deleteTask.html',form=form,message=error)
 
 @app.route('/return')
 def returnNum():
@@ -66,8 +109,7 @@ def ben():
 def list():
     return render_template('list.html',users=["ben", "harry", "bob", "jay", "matt", "bill"])
 
-@app.route('/', methods=['GET','POST'])
-@app.route('/home', methods=['GET','POST'])
+@app.route('/oldhome', methods=['GET','POST'])
 def register():
     error=""
     form = BasicForm()
@@ -95,4 +137,3 @@ def postName():
         return render_template('register.html',form=form,username=username)
     else:
         return render_template('register.html',form=form,username="")
-        

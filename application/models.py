@@ -37,6 +37,7 @@ class Games(db.Model):
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
+    description=db.Column(db.String(100),nullable=False)
     complete = db.Column(db.Boolean)
 
 class BasicForm(FlaskForm):
@@ -47,3 +48,10 @@ class BasicForm(FlaskForm):
     height = DecimalField()
     confirm= SelectField('Language', choices=[('English', 'English'), ('Spanish', 'Spanish'), ('English', 'Welsh')])
     submit = SubmitField('Add Name')
+
+
+class ShowToDoList(FlaskForm):
+    name=StringField('Task: ')
+    description=StringField('Description')
+    status=StringField('Complete: ')
+    submit = SubmitField('Confirm')

@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Simple form</title>
+    </head>
+    <body>
+        <div class='form'>
+            <form method='POST' action=''>
+                {{ form.hidden_tag() }}               
+                {% for task in tasks %}
+                <br>
+                {{ task.name }} {{task.description}} {{task.status}}
+                
+                {% endfor %}
+            </form>
+        </div>
+    </body>
+</html>
+
