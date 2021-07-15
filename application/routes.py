@@ -35,13 +35,7 @@ def read():
     for task in all_tasks:
         tasks_string += "<br>"+ task.name + " " + task.description + " " + str(task.complete)
     return "<h1>My List</h1> " + tasks_string
-    for task in all_tasks:
-        form.name=task.name
-        form.description=task.description
-        form.status=task.complete
-        forms.append(form)
-
-    return render_template('homeTask.html',tasks=forms,form=form)
+    
 
 @app.route('/update',methods=['GET','POST'])
 def update():
@@ -70,9 +64,10 @@ def status():
             error='Plese search for an existing task'
         else:
             task = Task.query.filter_by(name=form.name.data).first()
-            task.complete=True
+            if task.complete==True:task.complete=False
+            else: task.complete=True
             db.session.commit()
-            return 'Completed the task'
+            return 'Task status updated!'
     return render_template('deleteTask.html',form=form,message=error)
 
 
