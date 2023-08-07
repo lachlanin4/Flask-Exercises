@@ -7,3 +7,5 @@ flask_wtf
 pytest
 pytest-cov
 flask-testing
+markupsafe==2.0.1
+itsdangerous==2.0.1
